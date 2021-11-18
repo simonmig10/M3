@@ -1,0 +1,29 @@
+---
+title: "Assigment 1 M3"
+author: "Simon"
+date: "17/11/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(skimr)
+
+data = read_csv("https://github.com/SDS-AAU/SDS-master/raw/master/M3/assignments/find_elon.gz")
+```
+```{r}
+data= data %>%
+  rename(text= "0")
+```
+
+
+```{r}
+library(keras)
+
+tokenizer = text_tokenizer(num_words= 1000)
+text=fit_text_tokenizer(tokenizer, x=data['text'])
+sequences = texts_to_sequences(tokenizer, data['text'])
+
+```
+
