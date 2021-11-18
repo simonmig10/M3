@@ -12,6 +12,7 @@ library(skimr)
 
 data = read_csv("https://github.com/SDS-AAU/SDS-master/raw/master/M3/assignments/find_elon.gz")
 ```
+
 ```{r}
 data= data %>%
   rename(text= "0")
@@ -21,9 +22,22 @@ data= data %>%
 ```{r}
 library(keras)
 
-tokenizer = text_tokenizer(num_words= 1000)
-text=fit_text_tokenizer(tokenizer, x=data['text'])
-sequences = texts_to_sequences(tokenizer, data['text'])
+text_vector1= data['text']
 
+test=deframe(text_vector1)
+
+guess <- 1000 # Use a guess here
+tokenizer <- text_tokenizer(num_words = guess, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n" ) %>%
+  fit_text_tokenizer(test)
+num_words <- length(tokenizer$word_index) %>%
+  min(20000)
+tokenizer <- text_tokenizer(num_words = num_words) %>%
+  fit_text_tokenizer(test)
+sequences = texts_to_sequences(tokenizer, test)
 ```
+
+
+
+
+
 
