@@ -15,29 +15,93 @@ data = read_csv("https://github.com/SDS-AAU/SDS-master/raw/master/M3/assignments
 
 ```{r}
 data= data %>%
-  rename(text= "0")
+  rename(text= "0", y="1")
+```
+
+
+We start by creating test and training data 
+
+```{r}
+split= initial_split(data, prop = 0.75)
+
+train_data= training(split)
+test_data= testing(split)
+```
+
+
+tror det er her vi skal dele det op i text og y
+
+```{r}
+x_train_data= train_data %>% pull(text)
+y_train_data= train_data %>% pull(y)
+
+x_test_data= test_data %>% pull(text)
+y_test_data= test_data %>% pull(y)
 ```
 
 
 ```{r}
 library(keras)
 
-text_vector1= data['text']
+#for training data
+num_words <- 1000 # Use a guess here
+tokenizer_train <- text_tokenizer(num_words = guess, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n" ) %>%
+  fit_text_tokenizer(x_train_data)
 
-test=deframe(text_vector1)
+sequences_train = texts_to_sequences(tokenizer_train, x_train_data)
 
-guess <- 1000 # Use a guess here
-tokenizer <- text_tokenizer(num_words = guess, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n" ) %>%
-  fit_text_tokenizer(test)
-num_words <- length(tokenizer$word_index) %>%
-  min(20000)
-tokenizer <- text_tokenizer(num_words = num_words) %>%
-  fit_text_tokenizer(test)
-sequences = texts_to_sequences(tokenizer, test)
+
+#For test data
+
+tokenizer_test <- text_tokenizer(num_words = guess, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n" ) %>%
+  fit_text_tokenizer(x_test_data)
+
+sequences_test = texts_to_sequences(tokenizer_test, x_test_data)
+
 ```
 
 
 
+# Vectorizing Doesnt work 
 
+we use this function Daniel made to vectorize the sequences :)
+```{r}
+# Again, a small function that creates a 0-matrix, and replaces the corresponding words with 1.
+vectorize_sequences <- function(sequences, dimension) {
+  results <- matrix(0, nrow = length(sequences), ncol = dimension) # Creates an all-zero matrix of shape (length(sequences), dimension)
+  for(i in 1:length(sequences)){
+    results[i, sequences[[i]]] <- 1 # Sets specific indices of results[i] to 1s
+  }
+  return(results)
+}
+```
+
+we use it on the training and test dataa
+
+```{r}
+x_train <- sequences_train %>% vectorize_sequences(dimension = 1000) 
+x_test <- sequences_test %>% vectorize_sequences(dimension = 1000) 
+```
+
+
+# padding
+
+kan ik få ovenstående funktion til at virke så prøver padding i stedet
+
+
+```{r}
+x_train_pad <- sequences_train %>% pad_sequences(maxlen=10000,padding="post",value=0)
+x_test_pad <- sequences_test %>% pad_sequences(maxlen=10000,padding="post",value=0)
+
+```
+
+
+```{r}
+str(x_train_pad[1,])
+```
+Ser ud til det virker --> ved dog ik om det skal være 1 taller der er i dem og ik det tal de har fået. 
+
+
+Now the data is ready to be fed into a neural network.
 
 
