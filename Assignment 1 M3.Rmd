@@ -1,0 +1,185 @@
+---
+title: "M3 assignment 1"
+author: "Andreas Methling"
+date: "19/11/2021"
+output: pdf_document
+---
+```{r}
+library(tidyverse)
+library(magrittr)
+library(skimr)
+
+data = read_csv("https://github.com/SDS-AAU/SDS-master/raw/master/M3/assignments/find_elon.gz")
+```
+
+```{r}
+data= data %>%
+  rename(text= "0", y="1")
+```
+
+
+We start by creating test and training data 
+
+```{r}
+library(rsample)
+
+split= initial_split(data, prop = 0.75)
+
+train_data= training(split)
+test_data= testing(split)
+```
+
+
+tror det er her vi skal dele det op i text og y
+
+```{r}
+x_train_data= train_data %>% pull(text)
+y_train_data= train_data %>% pull(y)
+
+x_test_data= test_data %>% pull(text)
+y_test_data= test_data %>% pull(y)
+```
+
+
+```{r}
+library(keras)
+
+#for training data
+tokenizer_train <- text_tokenizer(num_words = 10000, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n" ) %>%
+  fit_text_tokenizer(x_train_data)
+
+sequences_train = texts_to_sequences(tokenizer_train, x_train_data)
+sequences_train2 = unlist(sequences_train)
+
+
+#For test data
+
+tokenizer_test <- text_tokenizer(num_words = 10000, filters = "!\"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n" ) %>%
+  fit_text_tokenizer(x_test_data)
+
+sequences_test = texts_to_sequences(tokenizer_test, x_test_data)
+sequences_test2 = unlist(sequences_test)
+
+```
+
+
+
+# Vectorizing Doesnt work 
+
+we use this function Daniel made to vectorize the sequences :)
+```{r}
+# Again, a small function that creates a 0-matrix, and replaces the corresponding words with 1.
+vectorize_sequences <- function(sequences, dimension) {
+  results <- matrix(0, nrow = length(sequences), ncol = dimension) # Creates an all-zero matrix of shape (length(sequences), dimension)
+  for(i in 1:length(sequences)){
+    results[i, sequences[[i]]] <- 1 # Sets specific indices of results[i] to 1s
+  }
+  return(results)
+}
+```
+
+we use it on the training and test dataa
+
+```{r}
+x_train <- sequences_train %>% vectorize_sequences(dimension = 10000) 
+x_test <- sequences_test %>% vectorize_sequences(dimension = 10000) 
+
+str(x_train[1,])
+```
+
+
+# padding
+
+kan ik få ovenstående funktion til at virke så prøver padding i stedet
+
+
+```{r}
+x_train_pad <- sequences_train %>% pad_sequences(maxlen=500)
+x_test_pad <- sequences_test %>% pad_sequences(maxlen=500)
+
+```
+
+
+```{r}
+glimpse(x_train_pad)
+```
+Ser ud til det virker --> ved dog ik om det skal være 1 taller der er i dem og ik det tal de har fået. 
+
+
+Now the data is ready to be fed into a neural network.
+
+## Baseline model
+
+
+```{r}
+model <- keras_model_sequential() %>%
+  layer_dense(units = 16, activation = "relu", input_shape = c(10000)) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+```
+
+
+```{r}
+model %>% compile(
+  optimizer = "adam",
+  loss = "binary_crossentropy",
+  metrics = "accuracy"
+)
+```
+
+
+```{r}
+summary(model)
+```
+
+```{r}
+history_ann <- model %>% fit(
+  x_train,
+  y_train_data,
+  epochs = 10,
+  batch_size = 512,
+  validation_split = 0.25
+)
+```
+
+```{r}
+plot(history_ann)
+```
+
+
+
+## Rnn model with paded data
+
+```{r}
+model_rnn <- keras_model_sequential() %>%
+  layer_embedding(input_dim = 10000, output_dim = 32) %>%
+  layer_simple_rnn(units = 32, activation = "tanh") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+```
+
+```{r}
+summary(model_rnn)
+```
+
+
+```{r}
+model_rnn %>% compile(
+  optimizer = "adam",
+  loss = "binary_crossentropy",
+  metrics = "accuracy"
+)
+```
+
+
+```{r}
+history_rnn <- model_rnn %>% fit(
+  x_train_pad, y_train_data,
+  epochs = 10,
+  batch_size = 128,
+  validation_split = 0.25
+)
+```
+
+
+
+
