@@ -117,7 +117,7 @@ Here the structure of the model can be viewed
 summary(model)
 ```
 
-## Training data
+### Training data
 And now the model is run 10 times with a batch size of 512
 ```{r}
 history_ann <- model %>% fit(
@@ -134,7 +134,7 @@ plot(history_ann)
 ```
 Already after the first epochs we can see, that the validations set crosses our training set, which means our model is over fitted. After ten epochs the accuracy is kinda high at almost 90% and by traning the model again this should become even higher/better.
 
-## Test data (SLET)
+### Test data (SLET)
 We can also run the model on the test data
 And now the model is run 10 times with a batch size of 512
 ```{r}
@@ -151,6 +151,12 @@ history_ann_test <- model %>% fit(
 plot(history_ann_test)
 ```
 Already after the first epochs we can see, that the validations set crosses our training set, which means our model is over fitted. After ten epochs the accuracy is kinda high at almost 90% and by traning the model again this should become even higher/better.
+
+## Evaluation
+```{r}
+history_ann; history_ann_test
+```
+
 
 Now we will try the data on a bit less naive model
 
@@ -198,7 +204,7 @@ model_rnn %>% compile(
 )
 ```
 
-## Training data
+#### Training data
 ```{r}
 history_rnn <- model_rnn %>% fit(
   x_train_pad, y_train_data,
@@ -213,7 +219,7 @@ plot(history_rnn)
 ```
 Again after a couple of epochs our model seems to be overfitted as the validation set crosses with our traning set, but our traning set has a rather high accuracy at the point of crossing so overall a good model.
 
-## test data (SLET)
+#### test data (SLET)
 ```{r}
 history_rnn_test <- model_rnn %>% fit(
   x_test_pad, y_test_data,
@@ -228,12 +234,18 @@ plot(history_rnn_test)
 ```
 Again after a couple of epochs our model seems to be overfitted as the validation set crosses with our traning set, but our traning set has a rather high accuracy at the point of crossing so overall a good model.
 
+### Evaluation
+```{r}
+history_rnn; history_rnn_test
+```
+
 
 Let's try to put the models on top of each other
 
 ```{r, fig.height = 4.5, fig.width = 7.5, fig.align = "center"}
 par(mfrow=c(2,1))
 plot(history_ann); plot(history_rnn)
+
 
 ```
 The first being the baseline and the second being the Recurrent neural network. Decide for yourself whcih one you like the most.
