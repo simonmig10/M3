@@ -246,7 +246,6 @@ Let's try to put the models on top of each other
 par(mfrow=c(2,1))
 plot(history_ann); plot(history_rnn)
 
-
 ```
 The first being the baseline and the second being the Recurrent neural network. Decide for yourself whcih one you like the most.
 
