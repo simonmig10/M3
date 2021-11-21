@@ -134,29 +134,11 @@ plot(history_ann)
 ```
 Already after the first epochs we can see, that the validations set crosses our training set, which means our model is over fitted. After ten epochs the accuracy is kinda high at almost 90% and by traning the model again this should become even higher/better.
 
-### Test data (SLET)
-We can also run the model on the test data
-And now the model is run 10 times with a batch size of 512
-```{r}
-history_ann_test <- model %>% fit(
-  x_test,
-  y_test_data,
-  epochs = 10,
-  batch_size = 512,
-  validation_split = 0.25
-)
-```
-
-```{r}
-plot(history_ann_test)
-```
-Already after the first epochs we can see, that the validations set crosses our training set, which means our model is over fitted. After ten epochs the accuracy is kinda high at almost 90% and by traning the model again this should become even higher/better.
-
 ## Evaluation
 ```{r}
-history_ann; history_ann_test
+history_ann
 ```
-
+Here we can see the metrics of the model in the final epoch.
 
 Now we will try the data on a bit less naive model
 
@@ -219,26 +201,11 @@ plot(history_rnn)
 ```
 Again after a couple of epochs our model seems to be overfitted as the validation set crosses with our traning set, but our traning set has a rather high accuracy at the point of crossing so overall a good model.
 
-#### test data (SLET)
-```{r}
-history_rnn_test <- model_rnn %>% fit(
-  x_test_pad, y_test_data,
-  epochs = 10,
-  batch_size = 128,
-  validation_split = 0.25
-)
-```
-
-```{r, warning=FALSE}
-plot(history_rnn_test) 
-```
-Again after a couple of epochs our model seems to be overfitted as the validation set crosses with our traning set, but our traning set has a rather high accuracy at the point of crossing so overall a good model.
-
 ### Evaluation
 ```{r}
-history_rnn; history_rnn_test
+history_rnn
 ```
-
+Here we can see the metrics of the model in the final epoch.
 
 Let's try to put the models on top of each other
 
