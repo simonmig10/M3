@@ -54,7 +54,7 @@ monsters %<>%
   mutate(baron_diff_10 = 0) %>%
   mutate(baron_diff_15 = 0)
 
-monsters %>%
+monsters %<>%
   replace_na(list(dragon_diff_5 = 0, dragon_diff_10 = 0, dragon_diff_15 = 0))
 
 ```
