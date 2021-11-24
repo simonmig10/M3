@@ -1,0 +1,61 @@
+---
+title: "Exam"
+author: "Kristoffer Herrig Thorndal"
+date: "24/11/2021"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(magrittr)
+library(tidyverse)
+library(dplyr)
+monsters <- read_csv("monsters.csv")
+```
+
+```{r}
+monsters %<>%
+  mutate(Type= recode(Type, "EARTH_DRAGON" = "DRAGON", "WATER_DRAGON" = "DRAGON", "FIRE_DRAGON" = "DRAGON", "AIR_DRAGON" = "DRAGON", "ELDER_DRAGON" = "DRAGON"))
+
+monsters %>%
+  count(Team)
+
+dragon_5 = monsters %>% filter(Time <= 5) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(dragon_diff_5 = bDragons - rDragons) %>% 
+  select(Address, dragon_diff_5) %>% ungroup
+
+dragon_10 = monsters %>% filter(Time <= 10) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(dragon_diff_10 = bDragons - rDragons) %>% 
+  select(Address, dragon_diff_10) %>% ungroup
+
+dragon_15 = monsters %>% filter(Time <= 15) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(dragon_diff_15 = bDragons - rDragons) %>% 
+  select(Address, dragon_diff_15) %>% ungroup
+
+monsters %<>%
+  count(Address) %>%
+  select(Address) %>%
+  left_join(dragon_5) %>%
+  left_join(dragon_10) %>%
+  left_join(dragon_15) %>%
+  select(Address, dragon_diff_5, dragon_diff_10, dragon_diff_15)
+
+monsters %<>%
+  mutate(baron_diff_5 = 0) %>%
+  mutate(baron_diff_10 = 0) %>%
+  mutate(baron_diff_15 = 0)
+
+monsters %>%
+  replace_na(list(dragon_diff_5 = 0, dragon_diff_10 = 0, dragon_diff_15 = 0))
+
+```
+
