@@ -1,0 +1,42 @@
+---
+title: "Gold"
+author: "Mikkel Bak Lyngø"
+date: "24 nov 2021"
+output: word_document
+---
+
+```{r, message = FALSE}
+library(tidyverse)
+library(magrittr)
+library(skimr)
+```
+
+```{r}
+library(readr)
+gold <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/gold.csv")
+```
+
+```{r}
+gold_diff_5min=gold %>% select(Address, min_5) 
+
+gold_diff_10min=gold %>% select(Address, min_10)
+
+gold_diff_15min=gold %>% select(Address, min_15)
+
+
+
+#join the variables 
+
+total_gold=gold %>% 
+  count(Address)%>%
+  select(Address) %>% 
+  left_join(gold_diff_5min) %>%
+  left_join(gold_diff_10min, by = c("Address"))%>%
+  left_join(gold_diff_15min, by = c("Address"))#%>%
+  #replace_na(list(gold_dif_5min=0, gold_dif_10min= 0, gold_dif_15min=0))
+
+```
+
+
+
+
