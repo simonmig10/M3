@@ -24,7 +24,6 @@ gold_diff_10min=gold %>% filter(Type == "golddiff") %>% select(Address, min_10)
 gold_diff_15min=gold %>% filter(Type == "golddiff") %>% select(Address, min_15)
 
 #join the variables 
-
 total_gold=gold %>% 
   count(Address)%>%
   select(Address) %>% 
