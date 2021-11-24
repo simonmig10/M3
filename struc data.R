@@ -1,8 +1,11 @@
 library(readr)
 library(tidyverse)
+library(magrittr)
 structures <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/structures.csv")
 
 structures %>% count(Address)
+
+matchinfo %<>% select(bResult, Address)
 
 min5 = structures %>% filter(Time <= 5) %>%
   group_by(Address) %>%
@@ -44,4 +47,5 @@ total_struc = structures %>%
   mutate(inhib_diff_5 = 0) %>% 
   mutate(inhib_diff_10 = 0) %>% 
   left_join(min15_in, by = c("Address")) %>% 
-  replace_na(list(tower_diff_5 = 0, tower_diff_10 = 0, tower_diff_15 = 0, inhib_diff_15 = 0))
+  replace_na(list(tower_diff_5 = 0, tower_diff_10 = 0, tower_diff_15 = 0, inhib_diff_15 = 0)) %>% 
+  left_join(matchinfo, by = c("Address"))
