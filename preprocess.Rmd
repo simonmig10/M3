@@ -201,3 +201,11 @@ dataset= total_struc %>%
   select(last_col(1:19), Address)
 ```
 
+# To excel
+
+```{r}
+library(writexl)
+
+##write_xlsx(dataset, "C:/Users/andre/Dropbox/Uni/Github/Exam M3/M3/preprocess.xlsx") ## Skriv hvor i vil have den placeret og til sidst hvad den skal hedde + xlsx, men har skubbet den så behøver i 
+```
+
