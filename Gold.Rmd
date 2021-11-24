@@ -35,9 +35,6 @@ total_gold=gold %>%
   left_join(gold_diff_15min, by = c("Address"))#%>%
   #replace_na(list(gold_dif_5min=0, gold_dif_10min= 0, gold_dif_15min=0))
 
-
-
-
 ```
 
 
