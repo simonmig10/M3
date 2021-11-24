@@ -50,9 +50,6 @@ total_kills=kills %>%
   left_join(kill_dif_10min, by = c("Address"))%>%
   left_join(kill_dif_15min, by = c("Address"))%>%
   replace_na(list(kill_diff_5=0, kill_diff_10= 0, kill_diff_15=0))
-
-
-
 ```
 
 
