@@ -116,6 +116,8 @@ Here the structure of the model can be viewed
 ```{r}
 summary(model)
 ```
+
+### Training data
 And now the model is run 10 times with a batch size of 512
 ```{r}
 history_ann <- model %>% fit(
@@ -131,6 +133,12 @@ history_ann <- model %>% fit(
 plot(history_ann)
 ```
 Already after the first epochs we can see, that the validations set crosses our training set, which means our model is over fitted. After ten epochs the accuracy is kinda high at almost 90% and by traning the model again this should become even higher/better.
+
+## Evaluation
+```{r}
+history_ann
+```
+Here we can see the metrics of the model in the final epoch.
 
 Now we will try the data on a bit less naive model
 
@@ -178,7 +186,7 @@ model_rnn %>% compile(
 )
 ```
 
-
+#### Training data
 ```{r}
 history_rnn <- model_rnn %>% fit(
   x_train_pad, y_train_data,
@@ -192,6 +200,12 @@ history_rnn <- model_rnn %>% fit(
 plot(history_rnn) 
 ```
 Again after a couple of epochs our model seems to be overfitted as the validation set crosses with our traning set, but our traning set has a rather high accuracy at the point of crossing so overall a good model.
+
+### Evaluation
+```{r}
+history_rnn
+```
+Here we can see the metrics of the model in the final epoch.
 
 Let's try to put the models on top of each other
 
