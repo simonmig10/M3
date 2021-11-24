@@ -1,0 +1,203 @@
+---
+title: "Modeling"
+author: "Simon"
+date: "24/11/2021"
+output: html_document
+---
+
+
+# Kills
+
+
+pakker
+
+```{r}
+library(tidyverse)
+library(magrittr)
+```
+
+
+```{r}
+library(readr)
+kills <- read_csv("kills.csv")
+```
+
+We now want to create so the dataset has kill difference over time for every 5. min. 
+
+```{r}
+kill_dif_5min=kills %>% filter(Time <= 5) %>%
+  count(Address, Team) %>% pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(kill_diff_5= bKills- rKills)%>%
+  rename(bkills_5= bKills,  rkills_5= rKills)%>%
+  select(Address, kill_diff_5)
+
+kill_dif_10min= kills %>% filter(Time <= 10) %>%
+  count(Address, Team) %>% pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(kill_diff_10= bKills- rKills)%>%
+  rename(bkills_10= bKills,  rkills_10= rKills)%>%
+  select(Address, kill_diff_10)
+
+kill_dif_15min= kills %>% filter(Time <= 15) %>%
+  count(Address, Team) %>% pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(kill_diff_15= bKills- rKills)%>%
+  rename(bkills_15= bKills,  rkills_15= rKills)%>%
+  select(Address, kill_diff_15)
+
+
+
+#join the variables 
+
+total_kills=kills %>% 
+  count(Address)%>%
+  select(Address) %>% 
+  left_join(kill_dif_5min) %>%
+  left_join(kill_dif_10min, by = c("Address"))%>%
+  left_join(kill_dif_15min, by = c("Address"))%>%
+  replace_na(list(kill_diff_5=0, kill_diff_10= 0, kill_diff_15=0))
+```
+
+
+# Monsters 
+
+```{r}
+monsters <- read_csv("monsters.csv")
+```
+
+```{r}
+monsters %<>%
+  mutate(Type= recode(Type, "EARTH_DRAGON" = "DRAGON", "WATER_DRAGON" = "DRAGON", "FIRE_DRAGON" = "DRAGON", "AIR_DRAGON" = "DRAGON", "ELDER_DRAGON" = "DRAGON"))
+
+monsters %>%
+  count(Team)
+
+dragon_5 = monsters %>% filter(Time <= 5) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(dragon_diff_5 = bDragons - rDragons) %>% 
+  select(Address, dragon_diff_5) %>% ungroup
+
+dragon_10 = monsters %>% filter(Time <= 10) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(dragon_diff_10 = bDragons - rDragons) %>% 
+  select(Address, dragon_diff_10) %>% ungroup
+
+dragon_15 = monsters %>% filter(Time <= 15) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(dragon_diff_15 = bDragons - rDragons) %>% 
+  select(Address, dragon_diff_15) %>% ungroup
+
+monsters %<>%
+  count(Address) %>%
+  select(Address) %>%
+  left_join(dragon_5) %>%
+  left_join(dragon_10) %>%
+  left_join(dragon_15) %>%
+  select(Address, dragon_diff_5, dragon_diff_10, dragon_diff_15)
+
+monsters %<>%
+  mutate(baron_diff_5 = 0) %>%
+  mutate(baron_diff_10 = 0) %>%
+  mutate(baron_diff_15 = 0)
+
+monsters %<>%
+  replace_na(list(dragon_diff_5 = 0, dragon_diff_10 = 0, dragon_diff_15 = 0))
+
+```
+
+
+#Structure
+
+```{r}
+structures <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/structures.csv")
+
+matchinfo <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/matchinfo.csv")
+```
+
+```{r}
+
+matchinfo %<>% select(bResult, Address)
+
+min5 = structures %>% filter(Time <= 5) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(tower_diff_5 = bTowers - rTowers) %>% 
+  select(Address, tower_diff_5) %>% ungroup
+
+
+min10 = structures %>% filter(Time <= 10) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(tower_diff_10 = bTowers - rTowers) %>% 
+  select(Address, tower_diff_10) %>% ungroup
+
+
+min15 = structures %>% filter(Time <= 15) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(tower_diff_15 = bTowers - rTowers) %>% 
+  select(Address, tower_diff_15) %>% ungroup
+
+
+min15_in = structures %>% filter(Time <= 15) %>%
+  group_by(Address) %>%
+  count(Team) %>%
+  pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
+  mutate(inhib_diff_15 = bInhibs - rInhibs) %>% 
+  select(Address, inhib_diff_15) %>% ungroup
+
+total_struc = structures %>% 
+  count(Address) %>% 
+  select(Address) %>% 
+  left_join(min5, by = c("Address")) %>% 
+  left_join(min10, by = c("Address")) %>% 
+  left_join(min15, by = c("Address")) %>% 
+  mutate(inhib_diff_5 = 0) %>% 
+  mutate(inhib_diff_10 = 0) %>% 
+  left_join(min15_in, by = c("Address")) %>% 
+  replace_na(list(tower_diff_5 = 0, tower_diff_10 = 0, tower_diff_15 = 0, inhib_diff_15 = 0)) %>% 
+  left_join(matchinfo, by = c("Address"))
+```
+
+
+# Gold
+
+```{r}
+gold <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/gold.csv")
+```
+
+```{r}
+gold_diff_5min=gold %>% filter(Type == "golddiff") %>% select(Address, min_5) 
+
+gold_diff_10min=gold %>% filter(Type == "golddiff") %>% select(Address, min_10)
+
+gold_diff_15min=gold %>% filter(Type == "golddiff") %>% select(Address, min_15)
+
+#join the variables 
+total_gold=gold %>% 
+  count(Address)%>%
+  select(Address) %>% 
+  left_join(gold_diff_5min) %>%
+  left_join(gold_diff_10min, by = c("Address"))%>%
+  left_join(gold_diff_15min, by = c("Address"))
+
+```
+
+
+# Dataset
+
+```{r}
+dataset= total_struc %>% 
+  left_join(total_kills, by= c("Address"))%>%
+  left_join(monsters, by= c("Address")) %>%
+  left_join(total_gold, by= c("Address")) %>%
+  select(last_col(1:19), Address)
+```
+
