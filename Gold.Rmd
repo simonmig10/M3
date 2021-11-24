@@ -17,13 +17,11 @@ gold <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/gold.csv"
 ```
 
 ```{r}
-gold_diff_5min=gold %>% select(Address, min_5) 
+gold_diff_5min=gold %>% filter(Type == "golddiff") %>% select(Address, min_5) 
 
-gold_diff_10min=gold %>% select(Address, min_10)
+gold_diff_10min=gold %>% filter(Type == "golddiff") %>% select(Address, min_10)
 
-gold_diff_15min=gold %>% select(Address, min_15)
-
-
+gold_diff_15min=gold %>% filter(Type == "golddiff") %>% select(Address, min_15)
 
 #join the variables 
 
@@ -32,8 +30,7 @@ total_gold=gold %>%
   select(Address) %>% 
   left_join(gold_diff_5min) %>%
   left_join(gold_diff_10min, by = c("Address"))%>%
-  left_join(gold_diff_15min, by = c("Address"))#%>%
-  #replace_na(list(gold_dif_5min=0, gold_dif_10min= 0, gold_dif_15min=0))
+  left_join(gold_diff_15min, by = c("Address"))
 
 ```
 
