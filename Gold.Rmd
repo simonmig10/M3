@@ -13,41 +13,33 @@ library(skimr)
 
 ```{r}
 library(readr)
-kills <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/kills.csv")
+gold <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/gold.csv")
 ```
 
 ```{r}
-kill_dif_5min=kills %>% filter(Time <= 5) %>%
-  count(Address, Team) %>% pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
-  mutate(kill_diff_5= bKills- rKills)%>%
-  rename(bkills_5= bKills,  rkills_5= rKills)%>%
-  select(Address, kill_diff_5)
+gold_diff_5min=gold %>% select(Address, min_5) 
 
-kill_dif_10min= kills %>% filter(Time <= 10) %>%
-  count(Address, Team) %>% pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
-  mutate(kill_diff_10= bKills- rKills)%>%
-  rename(bkills_10= bKills,  rkills_10= rKills)%>%
-  select(Address, kill_diff_10)
+gold_diff_10min=gold %>% select(Address, min_10)
 
-kill_dif_15min= kills %>% filter(Time <= 15) %>%
-  count(Address, Team) %>% pivot_wider(names_from = Team, values_from = n, values_fill = 0) %>%
-  mutate(kill_diff_15= bKills- rKills)%>%
-  rename(bkills_15= bKills,  rkills_15= rKills)%>%
-  select(Address, kill_diff_15)
+gold_diff_15min=gold %>% select(Address, min_15)
 
 
 
 #join the variables 
 
-total_kills=kills %>% 
+total_gold=gold %>% 
   count(Address)%>%
   select(Address) %>% 
-  left_join(kill_dif_5min) %>%
-  left_join(kill_dif_10min, by = c("Address"))%>%
-  left_join(kill_dif_15min, by = c("Address"))%>%
-  replace_na(list(kill_diff_5=0, kill_diff_10= 0, kill_diff_15=0))
+  left_join(gold_diff_5min) %>%
+  left_join(gold_diff_10min, by = c("Address"))%>%
+  left_join(gold_diff_15min, by = c("Address"))#%>%
+  #replace_na(list(gold_dif_5min=0, gold_dif_10min= 0, gold_dif_15min=0))
 
 
 
 
 ```
+
+
+
+
