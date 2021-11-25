@@ -9,6 +9,7 @@ pakker
 ```{r}
 library(tidyverse)
 library(keras)
+library(recipes)
 ```
 
 
@@ -58,6 +59,8 @@ x_test <- bake(data_recipe, new_data = data_test) %>% select(-starts_with('y')) 
 ```{r}
 y_train <- juice(data_recipe)  %>% select(starts_with('y')) %>% as.matrix()
 y_test <- bake(data_recipe, new_data = data_test) %>% select(starts_with('y')) %>% as.matrix()
+
+y_train2 = y_train[,1]
 ```
 
 
@@ -69,22 +72,22 @@ model_keras <- keras_model_sequential()
 model_keras %>% 
   # First hidden layer
   layer_dense(
-    units              = 12, 
+    units              = 8, 
     activation         = "relu", 
     input_shape        = ncol(x_train)) %>% 
   # Dropout to prevent overfitting
-  layer_dropout(rate = 0.1) %>%
-  # Second hidden layer
-  layer_dense(
-    units              = 12, 
-    activation         = "relu") %>% 
-  # Dropout to prevent overfitting
-  layer_dropout(rate = 0.1) %>%
+  layer_dropout(rate = 0.15)  %>%
   # Output layer
   layer_dense(
-    units              = ncol(y_train), 
+    units              = 1, 
     activation         = "sigmoid") 
 ```
+
+
+```{r}
+summary(model_keras)
+```
+
 
 
 ```{r}
@@ -99,13 +102,35 @@ model_keras %>%
 
 ```{r}
 model_keras_hist <- model_keras  %>% fit(x = x_train, 
-                                         y = y_train, 
-                                         epochs = 10, # How often shall we re-run the model on the whole sample
-                                         batch_size = 12, # How many observations should be included in every batch
+                                         y = y_train2, 
+                                         epochs = 20, # How often shall we re-run the model on the whole sample
+                                         batch_size = 128, # How many observations should be included in every batch
                                          validation_split = 0.25 # If we want to do a  cross-validation in the training
                                          )
 ```
 
 
+## simple
+
+```{r}
+
+network <- keras_model_sequential() %>% 
+  layer_dense(units = 256, activation = "relu", input_shape = ncol(x_train)) %>%
+  layer_dense(units = 1, activation = "sigmoid")
+
+network %>% 
+  compile(
+    optimizer = "adam",
+    loss = "binary_crossentropy",
+    metrics = "accuracy"
+  )
+
+network_f <- network  %>% fit(x = x_train, 
+                                         y = y_train2, 
+                                         epochs = 10, # How often shall we re-run the model on the whole sample
+                                         batch_size = 12, # How many observations should be included in every batch
+                                         validation_split = 0.25 # If we want to do a  cross-validation in the training
+                                         )
+```
 
 
