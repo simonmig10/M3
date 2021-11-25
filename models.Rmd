@@ -17,12 +17,16 @@ library(readxl)
 data_start <- read_excel("preprocess.xlsx")
 ```
 
+```{r}
+data_start %<>% mutate(y= ifelse(rResult==1, "red_win","blue_win")) %>% select(- rResult, -bResult)
+```
+
 
 preprocess
 
 ```{r}
 data = data_start %>%
-  rename(y= bResult) %>%
+  relocate(y) %>%
   select(-c(Address, baron_diff_10, baron_diff_15, baron_diff_5, inhib_diff_10, inhib_diff_5))
 ```
 
@@ -40,18 +44,72 @@ data_test <- data_split %>% testing()
 ```{r}
 data_recipe <- data_train %>%
   recipe(y ~.) %>%
-  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_center(all_numeric(), -all_outcomes()) %>% # Centers all numeric variables to mean = 0
+  step_scale(all_numeric(), -all_outcomes()) %>% # scales all numeric variables to sd = 1
+  step_dummy(all_nominal(), one_hot = TRUE) %>%
   prep()
 ```
 
 ```{r}
-x_train <- juice(data_recipe) %>% select(-y) %>% as.matrix()
-y_train <- juice(data_recipe) %>% pull(y)   
-#x_train <- x_train[y_train == 0,]
-
-x_test <- bake(data_recipe, new_data = data_test) %>% select(-y) %>% as.matrix()
-y_test <- bake(data_recipe, new_data = data_test) %>% pull(y) 
+x_train <- juice(data_recipe) %>% select(-starts_with('y')) %>% as.matrix()
+x_test <- bake(data_recipe, new_data = data_test) %>% select(-starts_with('y')) %>% as.matrix()
 ```
+
+```{r}
+y_train <- juice(data_recipe)  %>% select(starts_with('y')) %>% as.matrix()
+y_test <- bake(data_recipe, new_data = data_test) %>% select(starts_with('y')) %>% as.matrix()
+```
+
+
+```{r}
+model_keras <- keras_model_sequential()
+```
+
+```{r}
+model_keras %>% 
+  # First hidden layer
+  layer_dense(
+    units              = 12, 
+    activation         = "relu", 
+    input_shape        = ncol(x_train)) %>% 
+  # Dropout to prevent overfitting
+  layer_dropout(rate = 0.1) %>%
+  # Second hidden layer
+  layer_dense(
+    units              = 12, 
+    activation         = "relu") %>% 
+  # Dropout to prevent overfitting
+  layer_dropout(rate = 0.1) %>%
+  # Output layer
+  layer_dense(
+    units              = ncol(y_train), 
+    activation         = "sigmoid") 
+```
+
+
+```{r}
+model_keras %>% 
+  compile(
+    optimizer = "adam",
+    loss = "binary_crossentropy",
+    metrics = "accuracy"
+  )
+```
+
+
+```{r}
+model_keras_hist <- model_keras  %>% fit(x = x_train, 
+                                         y = y_train, 
+                                         epochs = 10, # How often shall we re-run the model on the whole sample
+                                         batch_size = 12, # How many observations should be included in every batch
+                                         validation_split = 0.25 # If we want to do a  cross-validation in the training
+                                         )
+```
+
+
+
+
+
 
 # ANN
 
