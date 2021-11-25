@@ -19,7 +19,7 @@ library(magrittr)
 
 ```{r}
 library(readr)
-kills <- read_csv("kills.csv")
+kills <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/kills.csv")
 ```
 
 We now want to create so the dataset has kill difference over time for every 5. min. 
@@ -60,7 +60,7 @@ total_kills=kills %>%
 # Monsters 
 
 ```{r}
-monsters <- read_csv("monsters.csv")
+monsters <- read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/monsters.csv")
 ```
 
 ```{r}
