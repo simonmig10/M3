@@ -190,6 +190,14 @@ total_gold=gold %>%
 
 ```
 
+#Mathcinfo
+
+```{r}
+result = read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/matchinfo.csv")
+
+result = result %>% select(Address, rResult)
+```
+
 
 # Dataset
 
@@ -198,6 +206,7 @@ dataset= total_struc %>%
   left_join(total_kills, by= c("Address"))%>%
   left_join(monsters, by= c("Address")) %>%
   left_join(total_gold, by= c("Address")) %>%
+  left_join(result, by = c("Address")) %>% 
   select(last_col(0:19), Address)
 ```
 
