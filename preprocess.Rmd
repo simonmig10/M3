@@ -189,6 +189,15 @@ total_gold=gold %>%
   left_join(gold_diff_15min, by = c("Address"))
 
 ```
+# Matchinfo
+
+```{r}
+result = read_csv("https://raw.githubusercontent.com/simonmig10/M3/main/matchinfo.csv")
+
+result = result %>% select(Address, rResult)
+
+
+```
 
 
 # Dataset
@@ -198,7 +207,8 @@ dataset= total_struc %>%
   left_join(total_kills, by= c("Address"))%>%
   left_join(monsters, by= c("Address")) %>%
   left_join(total_gold, by= c("Address")) %>%
-  select(last_col(0:19), Address)
+  left_join(result, by =c("Address")) %>% 
+  select(last_col(0:20), Address)
 ```
 
 # To excel
