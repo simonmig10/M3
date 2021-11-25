@@ -10,12 +10,10 @@ library(tidyverse)
 library(keras)
 ```
 
-
 ```{r}
 library(readxl)
 data_start <- read_excel("preprocess.xlsx")
 ```
-
 
 preprocess
 
