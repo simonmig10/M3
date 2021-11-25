@@ -1,0 +1,113 @@
+---
+title: "Final document"
+author: "Simon"
+date: "25/11/2021"
+output: html_document
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(keras)
+```
+
+
+```{r}
+library(readxl)
+data_start <- read_excel("preprocess.xlsx")
+```
+
+
+preprocess
+
+```{r}
+data = data_start %>%
+  rename(y= bResult) %>%
+  select(-c(Address, baron_diff_10, baron_diff_15, baron_diff_5, inhib_diff_10, inhib_diff_5))
+```
+
+we creat training and testing data
+
+```{r}
+library(rsample)
+data_split <- initial_split(data, prop = 0.75, strata = y)
+
+data_train <- data_split  %>%  training()
+data_test <- data_split %>% testing()
+```
+
+
+```{r}
+data_recipe <- data_train %>%
+  recipe(y ~.) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  prep()
+```
+
+```{r}
+x_train <- juice(data_recipe) %>% select(-y) %>% as.matrix()
+y_train <- juice(data_recipe) %>% pull(y)   
+#x_train <- x_train[y_train == 0,]
+
+x_test <- bake(data_recipe, new_data = data_test) %>% select(-y) %>% as.matrix()
+y_test <- bake(data_recipe, new_data = data_test) %>% pull(y) 
+```
+
+# ANN
+
+```{r}
+model <- keras_model_sequential() %>%
+  layer_dense(units = 16, activation = "relu", input_shape = ncol(x_train)) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+```
+
+```{r}
+model %>% compile(
+  optimizer = "adam",
+  loss = "binary_crossentropy",
+  metrics = "accuracy"
+)
+```
+
+
+```{r}
+summary(model)
+```
+
+```{r}
+history_ann <- model %>% fit(
+  x_train,
+  y_train,
+  epochs = 10,
+  batch_size = 256,
+  validation_split = 0.25
+)
+```
+
+# RNN
+
+```{r}
+model_keras <- keras_model_sequential()
+```
+
+```{r}
+model_keras %>% 
+  # First hidden layer
+  layer_dense(
+    units              = 12, 
+    activation         = "relu", 
+    input_shape        = ncol(x_train)) %>% 
+  # Dropout to prevent overfitting
+  layer_dropout(rate = 0.1) %>%
+  # Second hidden layer
+  layer_dense(
+    units              = 12, 
+    activation         = "relu") %>% 
+  # Dropout to prevent overfitting
+  layer_dropout(rate = 0.1) %>%
+  # Output layer
+  layer_dense(
+    units              = ncol(y_train), 
+    activation         = "softmax") 
+```
+
